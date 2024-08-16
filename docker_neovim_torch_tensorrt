@@ -1,0 +1,144 @@
+# image avec driver 12.1 et nvcc
+#FROM pytorch/libtorch-cxx11-builder:cuda12.1-main
+
+# image pour avoir tensorrt : https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tensorrt/tags
+FROM nvcr.io/nvidia/tensorrt:24.02-py3
+
+# tzdata
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+# Install base utilities
+RUN apt-get update && \
+    apt-get install -y build-essential  && \
+    apt-get install -y wget && \
+    apt-get clean && \
+    apt-get install -y sudo && \
+    apt-get install -y software-properties-common
+
+RUN apt install vim -y
+RUN apt install vim-gtk3 -y
+
+# node
+RUN apt install nodejs npm -y
+RUN npm cache clean -f
+RUN npm install -g n
+RUN n stable
+RUN n latest
+
+# python
+RUN apt install python3 -y
+RUN apt install python3-pip -y
+RUN apt install python3-venv -y
+RUN apt install python-is-python3 -y
+
+# install cmake
+RUN apt install -y libssl-dev
+# RUN git clone https://github.com/Kitware/CMake.git ~/cmake
+# RUN cd ~/cmake
+# RUN ./bootstrap && make -j6 && sudo make install
+RUN apt install cmake -y
+
+# autres libs
+RUN apt install ripgrep -y
+RUN apt install fd-find -y
+RUN apt install latexmk texlive-full -y
+RUN apt install git -y
+
+
+# install unstable risque ne focntionne pas partout
+# RUN add-apt-repository ppa:neovim-ppa/unstable -y
+# RUN apt-get update -y
+# RUN apt-get install neovim -y
+
+
+# install stable plus longue mais plus clean
+RUN git clone https://github.com/neovim/neovim /tmp/neovim 
+WORKDIR /tmp/neovim 
+RUN git checkout stable 
+
+RUN apt install gettext -y
+
+RUN make CMAKE_BUILD_TYPE=RelWithDebInfo 
+RUN make install
+
+RUN apt install curl -y
+RUN apt install xclip -y
+
+RUN pip install pynvim
+RUN pip install numpy
+RUN npm install -g neovim
+
+# install user
+# add user without password
+RUN adduser --disabled-password --gecos '' docker
+# add user as sudoer
+RUN adduser docker sudo
+# disable password
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# docker name of user
+USER docker
+# this is where I was running into problems with the other approaches
+RUN sudo apt-get update
+# se placer dans le sudoer
+WORKDIR /home/docker
+# Afficher le répertoire de travail
+
+RUN mkdir -p /home/docker/.config/nvim && \
+    chown -R docker:docker /home/docker/.config
+
+COPY --chown=docker:docker submodules/nvim /home/docker/.config/nvim/
+#RUN rm -rf /home/docker/nvim
+
+RUN nvim --headless -c +Lazy +qall
+RUN nvim --headless +TSUpdate +"sleep 10" +qall
+# # RUN nvim --headless +Mason +"sleep 3" +qall
+# RUN nvim --headless +MasonUpdate +"sleep 5" +qall
+#
+RUN nvim --headless +"MasonInstall pyright" +"sleep 5" +qall
+RUN nvim --headless +"MasonInstall texlab" +"sleep 5" +qall
+RUN nvim --headless +"MasonInstall cmake-language-server" +"sleep 5" +qall
+RUN nvim --headless +"MasonInstall bash-language-server" +"sleep 5" +qall
+RUN nvim --headless +"MasonInstall clangd" +"sleep 5" +qall
+RUN nvim --headless +"MasonInstall lua-language-server" +"sleep 5" +qall
+
+# recuperer la config bashrc
+COPY submodules/bashrc_config/bashrc /home/docker/.bashrc
+
+
+# -------------------------------------------------
+#  INSTALL CONDA MAMBA FOR PYTHON
+# -------------------------------------------------
+
+# Install Mamba
+ENV CONDA_DIR /home/docker/conda
+RUN wget -O /home/docker/Mambaforge.sh  "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+RUN bash /home/docker/Mambaforge.sh -b -p $CONDA_DIR
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# installer libtorch pour pouvoir installer torchvision
+COPY include/ /home/docker/include/
+
+# installer torchvision
+RUN git clone https://github.com/pytorch/vision.git
+RUN sudo apt install libpng-dev zlib1g-dev libjpeg-dev -y
+WORKDIR /home/docker/vision/build 
+RUN cmake -DCMAKE_PREFIX_PATH="/home/docker/include/libtorch-gpu/" ..
+RUN make
+RUN sudo make install
+
+RUN sudo apt install libopencv-dev -y
+
+# change workdir
+WORKDIR /home/docker
+# install Eigen3
+RUN sudo apt install libeigen3-dev
+# install spdlog
+RUN git clone https://github.com/gabime/spdlog.git
+WORKDIR /home/docker/spdlog/build
+RUN cmake .. && make -j && sudo make install
+# install pytorch
+RUN pip install torch
+RUN pip install opencv-python
+RUN pip install onnx
+
+
+
