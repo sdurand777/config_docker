@@ -1,6 +1,11 @@
 # Utilise l'image de base Ubuntu 22.04
 #FROM ubuntu:22.04
-FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
+#FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
+
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
 
 # tzdata
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
@@ -109,23 +114,50 @@ RUN bash /home/smith/Mambaforge.sh -b -p $CONDA_DIR
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 
-# insterface graphique
-RUN sudo apt install eog -y
+# recuperer DPVO
+RUN git clone https://github.com/sdurand777/test_dpvo.git --recursive
 
-# env conda pour le slam
-COPY env_slam.yml .
+WORKDIR test_dpvo
+
 
 RUN conda init bash && . ~/.bashrc
-RUN mamba env create -f env_slam.yml
+RUN conda env create -f env_slam.yml
+
+#RUN conda activate slam_env
+#RUN conda run --no-capture-output -n slam_exp pip install .
+
+#RUN conda run --no-capture-output -n slam_exp bash -c "source activate slam_exp && pip install ."
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=$CUDA_HOME/bin:$PATH
+
+#RUN conda run --no-capture-output -n slam_exp pip install .
+#RUN conda run --no-capture-output -n slam_exp python3 setup.py install
+
+#RUN conda run --no-capture-output -n slam_exp bash -c "source activate slam_exp && pip install ."
 
 
-# installation Eigen
-RUN sudo apt install libeigen3-dev -y
-RUN sudo apt-get install mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
-RUN sudo apt-get install libglew-dev libglfw3-dev libglm-dev -y
-RUN sudo apt-get install libao-dev libmpg123-dev -y
+
+# execute script
+#RUN conda run --no-capture-output -n slam_exp ./install_dpvo.sh
+
+
+# # insterface graphique
+# RUN sudo apt install eog -y
+#
+# # env conda pour le slam
+# COPY env_slam.yml .
+#
+# RUN conda init bash && . ~/.bashrc
+# RUN mamba env create -f env_slam.yml
+#
+# # installation Eigen
+# RUN sudo apt install libeigen3-dev -y
+# RUN sudo apt-get install mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
+# RUN sudo apt-get install libglew-dev libglfw3-dev libglm-dev -y
+# RUN sudo apt-get install libao-dev libmpg123-dev -y
+
+# recuperer git 
 
 
 
-
-CMD ["bash"]
+#CMD ["bash"]
