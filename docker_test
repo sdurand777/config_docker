@@ -1,0 +1,112 @@
+
+#FROM nvcr.io/nvidia/cudagl:11.3.0-devel-ubuntu20.04
+
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+
+# tzdata
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+
+# Install base utilities
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install mesa-utils -y && \
+    apt-get install mesa-utils-extra -y && \
+    apt-get install -y build-essential  && \
+    apt-get install -y wget && \
+    apt-get clean && \
+    apt-get install -y sudo && \
+    apt-get install -y neovim && \
+    apt-get install -y software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+
+# install user
+# add user without password
+RUN adduser --disabled-password --gecos '' docker
+# add user as sudoer
+RUN adduser docker sudo
+# disable password
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# docker name of user
+USER docker
+# this is where I was running into problems with the other approaches
+RUN sudo apt-get update
+# se placer dans le sudoer
+WORKDIR /home/docker
+
+# Install Mamba
+ENV CONDA_DIR /home/docker/conda
+RUN wget -O /home/docker/Mambaforge.sh  "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+RUN bash /home/docker/Mambaforge.sh -b -p $CONDA_DIR
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# install DROIDSLAM
+RUN sudo apt-get install -y git
+
+# recuperer env conda avant pour gagner du temps sur la maj de test_dpvo
+COPY environment.yaml .
+
+ENV PATH=/usr/local/cuda/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+RUN mamba env create -f environment.yaml
+RUN pip install evo --upgrade --no-binary evo
+RUN pip install gdown
+
+RUN mamba run --no-capture-output -n droidenv mamba install ninja
+
+# recuperer DPVO
+RUN git clone https://github.com/sdurand777/test_dpvo.git --recursive
+
+# RUN rm -rf test_dpvo && \
+#     git clone https://github.com/sdurand777/test_dpvo.git --recursive
+#RUN git clone https://github.com/sdurand777/test_dpvo.git --recursive
+
+WORKDIR test_dpvo
+
+RUN mamba run --no-capture-output -n droidenv python3 setup.py install
+
+# install ninja to save time
+RUN sudo apt install cmake -y
+RUN DEBIAN_FRONTEND=noninteractive ./Pangolin/scripts/install_prerequisites.sh recommended
+#RUN ./Pangolin/scripts/install_prerequisites.sh recommended
+RUN cd Pangolin && \
+    mkdir build && cd build && \
+    cmake .. && \
+    make -j8 && \
+    sudo make install
+
+
+RUN mamba run --no-capture-output -n droidenv pip install ./ViewerDPVO
+RUN sudo ldconfig
+
+
+
+
+
+
+
+
+
+
+# -------------------------------------
+#RUN mamba run --no-capture-output -n droidenv pip install .
+
+
+
+#RUN conda init bash && . ~/.bashrc
+#RUN conda env create -f env_slam.yml
+
+#ENV CUDA_HOME=/usr/local/cuda
+#ENV PATH=$CUDA_HOME/bin:$PATH
+
+#RUN conda run --no-capture-output -n slam_exp bash -c "source activate slam_exp && python3 setup.py install"
+
+# RUN mamba env create -f environment.yaml
+# RUN pip install evo --upgrade --no-binary evo
+# RUN pip install gdown
+# ## install droidslam
+
+
+
+
+

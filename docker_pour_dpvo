@@ -114,49 +114,75 @@ RUN bash /home/smith/Mambaforge.sh -b -p $CONDA_DIR
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 
-# recuperer DPVO
+ENV PATH=/usr/local/cuda/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+
+COPY env_slam.yml .
+
+RUN mamba env create -f env_slam.yml
+RUN pip install evo --upgrade --no-binary evo
+RUN pip install gdown
+
+ARG CACHEBUST=1
 RUN git clone https://github.com/sdurand777/test_dpvo.git --recursive
 
 WORKDIR test_dpvo
 
+RUN mamba run --no-capture-output -n slam_exp mamba install ninja
 
-RUN conda init bash && . ~/.bashrc
-RUN conda env create -f env_slam.yml
+RUN mamba run --no-capture-output -n slam_exp python3 setup.py install
 
-#RUN conda activate slam_env
-#RUN conda run --no-capture-output -n slam_exp pip install .
-
-#RUN conda run --no-capture-output -n slam_exp bash -c "source activate slam_exp && pip install ."
-ENV CUDA_HOME=/usr/local/cuda
-ENV PATH=$CUDA_HOME/bin:$PATH
-
-#RUN conda run --no-capture-output -n slam_exp pip install .
-#RUN conda run --no-capture-output -n slam_exp python3 setup.py install
-
-#RUN conda run --no-capture-output -n slam_exp bash -c "source activate slam_exp && pip install ."
+# install ninja to save time
+RUN sudo apt install cmake -y
+RUN DEBIAN_FRONTEND=noninteractive ./Pangolin/scripts/install_prerequisites.sh recommended
+#RUN ./Pangolin/scripts/install_prerequisites.sh recommended
+RUN cd Pangolin && \
+    mkdir build && cd build && \
+    cmake .. && \
+    make -j8 && \
+    sudo make install
 
 
 
-# execute script
-#RUN conda run --no-capture-output -n slam_exp ./install_dpvo.sh
+#COPY ./ViewerDPVO ./ViewerDPVO
 
-
-# # insterface graphique
-# RUN sudo apt install eog -y
+# WORKDIR ViewerDPVO
 #
-# # env conda pour le slam
-# COPY env_slam.yml .
-#
-# RUN conda init bash && . ~/.bashrc
-# RUN mamba env create -f env_slam.yml
-#
-# # installation Eigen
-# RUN sudo apt install libeigen3-dev -y
-# RUN sudo apt-get install mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
-# RUN sudo apt-get install libglew-dev libglfw3-dev libglm-dev -y
-# RUN sudo apt-get install libao-dev libmpg123-dev -y
+# RUN mkdir build && \
+#     cd build && \
+    #cmake .. -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/smith/test_dpvo/ViewerDPVO/build/lib.linux-x86_64-cpython-310/ -DPYTHON_EXECUTABLE=/home/smith/conda/envs/slam_exp/bin/python -DCMAKE_BUILD_TYPE=Debug -DTORCH_PATH=/home/smith/conda/envs/slam_exp/lib/python3.10/site-packages/torch -DCMAKE_CUDA_ARCHITECTURES=80;86;89
+    # cmake .. -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/smith/test_dpvo/ViewerDPVO/build/lib.linux-x86_64-cpython-310/ -DPYTHON_EXECUTABLE=/home/smith/conda/envs/slam_exp/bin/python -DCMAKE_BUILD_TYPE=Release -DTORCH_PATH=/home/smith/conda/envs/slam_exp/lib/python3.10/site-packages/torch "-DCMAKE_CUDA_ARCHITECTURES=80;86"
+    #
 
-# recuperer git 
+
+#
+RUN sudo ldconfig
+#
+#RUN mamba run --no-capture-output -n slam_exp python setup.py build_ext --inplace
+#
+#
+RUN mamba run --no-capture-output -n slam_exp pip install ./ViewerDPVO
+#
+#
+#
+# # RUN mamba run --no-capture-output -n slam_exp python setup.py install
+RUN sudo ldconfig
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
