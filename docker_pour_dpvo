@@ -120,7 +120,9 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 COPY env_slam.yml .
 
+
 RUN mamba env create -f env_slam.yml
+
 RUN pip install evo --upgrade --no-binary evo
 RUN pip install gdown
 
@@ -169,12 +171,11 @@ RUN mamba run --no-capture-output -n slam_exp pip install ./ViewerDPVO
 # # RUN mamba run --no-capture-output -n slam_exp python setup.py install
 RUN sudo ldconfig
 
+RUN ./download_models_and_data.sh
 
 
 
-
-
-
+RUN conda init bash && . ~/.bashrc
 
 
 
