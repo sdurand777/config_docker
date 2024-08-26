@@ -61,6 +61,23 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
 
+  droid:
+    image: docker_droid
+    network_mode: host
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tty: true
+
 
 
   # tensorrt:
