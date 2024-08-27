@@ -1,4 +1,4 @@
-name: slam_exp
+name: select_exp
 channels:
   - pyg
   - pytorch
@@ -17,6 +17,7 @@ dependencies:
   - tensordict
   - libffi
   - wayland
+  - timm==0.5.4
   #- open3d=0.15.1
   #- libffi
   # - libstdcxx-ng
@@ -26,6 +27,9 @@ dependencies:
   #- mkl=2024.0.0
   - pip:
       - pypose
+      - pyvista
+      - opt_einsum
+      - scikit-image
       - tqdm
       - wandb
       - imageio
