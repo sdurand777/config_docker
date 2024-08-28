@@ -1,4 +1,4 @@
-name: select_exp
+name: slam_exp
 channels:
   - pyg
   - pytorch
