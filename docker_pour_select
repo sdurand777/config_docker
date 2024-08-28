@@ -36,6 +36,8 @@ RUN apt install python-is-python3 -y
 # install cmake
 RUN apt install -y libssl-dev
 RUN apt install cmake -y
+RUN apt install eog -y
+
 
 # autres libs
 RUN apt install ripgrep -y
