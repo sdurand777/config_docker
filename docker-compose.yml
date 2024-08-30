@@ -133,5 +133,22 @@ services:
       - /home/ivm/test_dpvo/:/home/smith/test_dpvo/
     tty: true
 
+  unidepth:
+    image: docker_unidepth
+    network_mode: host
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tty: true
+
 
 

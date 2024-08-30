@@ -38,6 +38,7 @@ RUN apt install -y libssl-dev
 RUN apt install cmake -y
 RUN apt install eog -y
 
+
 # autres libs
 RUN apt install ripgrep -y
 RUN apt install fd-find -y
@@ -106,10 +107,6 @@ RUN nvim --headless +"MasonInstall bash-language-server" +"sleep 5" +qall
 RUN nvim --headless +"MasonInstall clangd" +"sleep 5" +qall
 RUN nvim --headless +"MasonInstall lua-language-server" +"sleep 5" +qall
 
-
-
-
-
 # -------------------------------------------------
 #  INSTALL CONDA MAMBA FOR PYTHON
 # -------------------------------------------------
@@ -124,130 +121,34 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-# --------------- install environnement
-# COPY env_slam.yml .
-#
-# RUN mamba env create -f env_slam.yml
+
+COPY env_slam_uni.yml .
+
+
+RUN mamba env create -f env_slam_uni.yml
 
 RUN pip install evo --upgrade --no-binary evo
 RUN pip install gdown
 
+ARG CACHEBUST=1
+RUN git clone https://github.com/sdurand777/test_unidepth.git --recursive
 
-# ------ install DPVSLAM
-#
-ARG CACHEBUST_DPVSLAM=1
-RUN git clone https://github.com/sdurand777/test_dpvslam.git --recursive
+WORKDIR test_unidepth
 
-WORKDIR test_dpvslam
-
-RUN mamba env create -f env_slam.yml
-
-RUN mamba run --no-capture-output -n dpvslam_exp mamba install ninja
-
-RUN mamba run --no-capture-output -n dpvslam_exp python3 setup.py install
-
-# install ninja to save time
-RUN sudo apt install cmake -y
-RUN DEBIAN_FRONTEND=noninteractive ./Pangolin/scripts/install_prerequisites.sh recommended
-
-RUN cd Pangolin && \
-    mkdir build && cd build && \
-    cmake .. && \
-    make -j8 && \
-    sudo make install
-
-RUN cd DBoW2 && \
-    mkdir -p build && cd build && \
-    cmake .. && \
-    make -j8 && \
-    sudo make install
+RUN mamba run --no-capture-output -n slam_exp mamba install ninja
 
 RUN sudo ldconfig
-
-# viewer
-RUN mamba run --no-capture-output -n dpvslam_exp pip install ./DPViewer
-
-# loop closure
-RUN mamba run --no-capture-output -n dpvslam_exp pip install ./DPRetrieval
-
-# # RUN mamba run --no-capture-output -n slam_exp python setup.py install
-RUN sudo ldconfig
-
-#RUN ./download_models_and_data.sh
-
-WORKDIR /home/smith/
-
-RUN rm -rf test_dpvslam
-
-# ------------- install MSDP
-
-ARG CACHEBUST_MSDP=1
-RUN git clone https://github.com/sdurand777/test_msdp.git --recursive
-
-WORKDIR test_msdp
-
-RUN mamba env create -f env_slam.yml
-
-# installation HL
-RUN cd thirdparty/Hierarchical-Localization && \
-    mamba run --no-capture-output -n msdp_exp pip install -e .
-
-# install setup cuda code for msdp
-RUN mamba run --no-capture-output -n msdp_exp python3 setup.py install
-
-# update links
-RUN sudo ldconfig
-
-# build viewer
-RUN mamba run --no-capture-output -n msdp_exp pip install ./Viewerexp
-
-WORKDIR /home/smith/
-
-RUN rm -rf test_msdp
-
-
-# # ----- install droid
 #
-# ARG CACHEBUST_DROID=1
-# RUN git clone https://github.com/sdurand777/test_droid.git --recursive
-#
-# WORKDIR test_droid
-#
-# # install setup cuda code for msdp
-# RUN mamba run --no-capture-output -n slam_exp python3 setup.py install
-#
-# # update links
-# RUN sudo ldconfig
-#
-# # move to home
-# WORKDIR /home/smith/
-#
-# # remove the install folder
-# RUN rm -rf test_droid
-
-# ------------ INSTALL DPVO
-
-ARG CACHEBUST_DPVO=1
-RUN git clone https://github.com/sdurand777/test_dpvo.git --recursive
-
-WORKDIR test_dpvo
-
-RUN mamba env create -f env_slam.yml
-
-RUN mamba run --no-capture-output -n dpvo_exp python3 setup.py install
-
-RUN sudo ldconfig
-
-RUN mamba run --no-capture-output -n dpvo_exp pip install ./ViewerDPVO
-
-# go back home
-WORKDIR /home/smith/
-
-# remove the install folder
-RUN rm -rf test_dpvo
-
-# inii conda
 RUN conda init bash && . ~/.bashrc
+
+
+
+
+
+
+
+
+
 
 
 #CMD ["bash"]
