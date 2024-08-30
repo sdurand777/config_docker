@@ -112,41 +112,26 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
 
+  tous:
+    image: docker_tous
+    network_mode: host
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /home/ivm/test_dpvslam/:/home/smith/test_dpvslam/
+      - /home/ivm/test_msdp/:/home/smith/test_msdp/
+      - /home/ivm/test_droid/:/home/smith/test_droid/
+      - /home/ivm/test_dpvo/:/home/smith/test_dpvo/
+    tty: true
 
 
 
-  # tensorrt:
-  #   image: docker_ivm_display
-  #   network_mode: host
-  #   runtime: nvidia
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
-  #   environment:
-  #     - DISPLAY=$DISPLAY
-  #   volumes:
-  #     - /tmp/.X11-unix:/tmp/.X11-unix
-  #     - .:/code
-  #   tty: true
-  #
-  # appgpu:
-  #   build: .
-  #   network_mode: host
-  #   runtime: nvidia
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
-  #   environment:
-  #     - DISPLAY=$DISPLAY
-  #   volumes:
-  #     - /tmp/.X11-unix:/tmp/.X11-unix
-  #     - .:/code
-  #   tty: true
