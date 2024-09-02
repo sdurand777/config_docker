@@ -177,7 +177,7 @@ RUN ./download_models_and_data.sh
 
 RUN conda init bash && . ~/.bashrc
 
-
+RUN sudo apt install graphviz -y
 
 
 

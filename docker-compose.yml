@@ -42,6 +42,7 @@ services:
       - DISPLAY=$DISPLAY
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - /home/ivm/dpvo_dev/:/home/smith/dpvo_dev/
     tty: true
 
   msdp:
