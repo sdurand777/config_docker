@@ -1,0 +1,7 @@
+
+# Utiliser votre image existante comme base
+FROM stan971/docker_tous:tagname
+
+RUN sudo apt update
+
+CMD bash
