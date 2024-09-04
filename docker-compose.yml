@@ -111,6 +111,7 @@ services:
       - DISPLAY=$DISPLAY
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - /home/ivm/dpvslam_dev/:/home/smith/dpvslam_dev/
     tty: true
 
   tous:
