@@ -82,6 +82,7 @@ RUN sudo apt-get update && sudo apt-get install -y git
 
 RUN git clone --recursive https://github.com/sdurand777/config_bashrc.git
 
+ARG NEOVIM_CACHEBUST=1
 RUN git clone --recursive https://github.com/sdurand777/config_neovim.git
 
 
