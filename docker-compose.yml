@@ -43,6 +43,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /home/ivm/dpvo_dev/:/home/smith/dpvo_dev/
+      - /home/ivm/config_neovim/:/home/smith/.config/nvim/
     tty: true
 
   msdp:
@@ -78,6 +79,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /home/ivm/droid_dev/:/home/smith/droid_dev/
+      - /home/ivm/config_neovim/:/home/smith/.config/nvim/
     tty: true
 
   select:
@@ -113,6 +115,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /home/ivm/dpvslam_dev/:/home/smith/dpvslam_dev/
+      - /home/ivm/config_neovim/:/home/smith/.config/nvim/
     tty: true
 
   tous:
