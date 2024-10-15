@@ -59,6 +59,7 @@ RUN apt install xclip -y
 RUN pip install pynvim
 RUN pip install numpy
 RUN npm install -g neovim
+RUN npm install -g tree-sitter-cli
 
 # Ajouter l'utilisateur sans mot de passe
 RUN adduser --disabled-password --gecos '' smith
@@ -108,13 +109,17 @@ RUN nvim --headless +"MasonInstall lua-language-server" +"sleep 5" +qall
 #  INSTALL CONDA MAMBA FOR PYTHON
 # -------------------------------------------------
 
+
+# Nouvelle install avec miniforge
 # Install Mamba
 ENV CONDA_DIR /home/smith/conda
-RUN wget -O /home/smith/Mambaforge.sh  "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
-RUN bash /home/smith/Mambaforge.sh -b -p $CONDA_DIR
+
+# Télécharger et installer Miniforge
+RUN wget -O /home/smith/Miniforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-$(uname -m).sh" \
+    && bash /home/smith/Miniforge.sh -b -p $CONDA_DIR \
+    && rm /home/smith/Miniforge.sh
+
 ENV PATH=$CONDA_DIR/bin:$PATH
-
-
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
