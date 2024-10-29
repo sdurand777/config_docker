@@ -64,6 +64,7 @@ RUN apt install -y libopencv-dev
 RUN pip install pynvim
 RUN pip install numpy
 RUN npm install -g neovim
+RUN npm install -g tree-sitter-cli
 
 # Ajouter l'utilisateur sans mot de passe
 RUN adduser --disabled-password --gecos '' smith
