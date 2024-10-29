@@ -42,6 +42,7 @@ RUN apt install ripgrep -y
 RUN apt install fd-find -y
 RUN apt install latexmk texlive-full -y
 RUN apt install git -y
+RUN apt update
 RUN apt install eog -y
 RUN apt install graphviz -y
 
