@@ -133,9 +133,9 @@ RUN pip install evo --upgrade --no-binary evo
 RUN pip install gdown
 
 ARG CACHEBUST=1
-RUN git clone https://github.com/sdurand777/test_dpvo.git --recursive
+RUN git clone https://github.com/sdurand777/dpvo_dev.git install_dpvo --recursive
 
-WORKDIR test_dpvo
+WORKDIR install_dpvo
 
 RUN mamba run --no-capture-output -n slam_exp mamba install ninja
 
